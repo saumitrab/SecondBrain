@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecondBrain</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>SecondBrain</h1>
+    <p class="description">Extract and embed content from this webpage</p>
+    
+    <div id="status" class="status">Ready to extract</div>
+    
+    <button id="extractBtn" class="extract-btn">Extract Content</button>
+    
+    <div id="resultContainer" class="result-container hidden">
+      <h3>Extraction Results:</h3>
+      <div id="resultDetails" class="result-details"></div>
+    </div>
+    
+    <div class="footer">
+      <span>Shortcut: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
