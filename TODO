@@ -1,0 +1,26 @@
+MVP
+1. [Sandeep] Get the chrome extension working with local LM Studio (Fix CORS)
+2. [Sandeep] Make a /ingest call (like test script) from chrome extention
+3. [Bonus] Get the /status from LM studio and disply in extension
+4. [Saumitra] Get the chromaDB setup
+5. [Saumitra] Test /ingest, /query, /status and create scripts
+6. [Tanmay] Move streamlit chat to fastapi-server
+7. [Tanmay] Add server status / LLM config on the streamlit app
+
+Bonus
+1. Verify image and video embedding
+2. Verify 'sources' in the results
+3. simplify local setup
+
+
+TL;DR
+Chrome extension: https://github.com/sans11-kumar/SummarizeMe
+Get the current web page data and make an LLM request to summarize
+TODO: change the request to /ingest
+
+Backend: <this repo>
+- Run locally 
+- /ingest: convert the post call data to embeddings and store in db?
+- /query: RAG (read from the db?) + LLM
+- /status: read the document count in db?
+- /chat: send the user prompt to /query 
