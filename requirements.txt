@@ -1,5 +1,9 @@
-fastapi
-uvicorn
-sentence-transformers
-streamlit
-requests
+fastapi>=0.68.0
+uvicorn>=0.15.0
+streamlit>=1.10.0
+sentence-transformers>=2.2.2
+requests>=2.26.0
+python-multipart>=0.0.5
+pydantic>=1.10.0
+pillow>=9.0.0
+numpy>=1.20.0
