@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "SecondBrain",
   "version": "1.0.0",
-  "description": "Save web content directly to your SecondBrain knowledge system",
+  "description": "Ingest web content into your SecondBrain knowledge management system",
   "permissions": [
     "activeTab",
     "storage",
