@@ -7,7 +7,6 @@ import os
 from typing import Optional
 
 # Import vector database and embedding model
-from db.vector_db import vector_db
 from models.embedding_model import create_embeddings
 
 from openai import OpenAI
@@ -103,18 +102,20 @@ async def query_llm(question: str, llm_choice: str = "local", model: Optional[st
     # Generate embedding for the query
     question_embedding = await create_embeddings(question, {})
     
-    # Retrieve the best matching document in the vector_db
-    best_similarity = 0.0
-    best_doc = None
-    for doc in vector_db.values():
-        # doc["embeddings"] is a list, compare with question_embedding
-        sim = cosine_similarity(question_embedding, doc["embeddings"])
-        if sim > best_similarity:
-            best_similarity = sim
-            best_doc = doc
+    # Use ChromaDB to find the most relevant documents
+    from db.vector_db import query_vector_db
     
-    THRESHOLD = 0.7  # similarity threshold
-    if best_similarity < THRESHOLD or not best_doc:
+    # Retrieve top 3 most relevant chunks
+    relevant_chunks, similarities = await query_vector_db(
+        query_embedding=question_embedding,
+        limit=3,  # Retrieve multiple chunks instead of just 1
+        threshold=0.1  # similarity threshold
+    )
+
+    logger.info(f"YYYYY Found {len(relevant_chunks)} relevant chunks with similarities: {similarities}")
+    
+    # If no document found or similarity is too low
+    if not relevant_chunks:
         logger.info("No sufficient context found in vector db.")
         model_info = f"{GROQ_MODELS.get(model, {}).get('name', model)}" if llm_choice == "groq" and model else "Local LLM"
         return QueryResponse(
@@ -123,14 +124,34 @@ async def query_llm(question: str, llm_choice: str = "local", model: Optional[st
             model_used=model_info
         )
     
-    context = best_doc["text"]
-    source_url = best_doc["metadata"].get("source_url", "")
+    # Sort chunks by similarity (descending)
+    sorted_chunks = sorted(zip(relevant_chunks, similarities), key=lambda x: x[1], reverse=True)
+
+    for idx, (_, sim) in enumerate(sorted_chunks, start=1):
+        logger.info(f"Chunk {idx} similarity score: {sim}")
+
     
-    # Prepare prompt with context for LLM
+    # Extract unique source URLs from all chunks
+    source_urls = []
+    for chunk, _ in sorted_chunks:
+        source_url = chunk["metadata"].get("source_url", "")
+        if source_url and source_url not in source_urls:
+            source_urls.append(source_url)
+    
+    # Combine chunks into a single context string, including information about their source
+    context_parts = []
+    for i, (chunk, similarity) in enumerate(sorted_chunks):
+        title = chunk["metadata"].get("title", "Untitled")
+        source_url = chunk["metadata"].get("source_url", "Unknown source")
+        context_parts.append(f"Source {i+1} - {title} ({source_url}):\n{chunk['text']}")
+    
+    combined_context = "\n\n---\n\n".join(context_parts)
+    
+    # Prepare prompt with combined context for LLM
     prompt = f"""Answer the question based only on the following context. If the context doesn't contain the answer, say "I don't have information about that in my knowledge base."
 
 Context:
-{context}
+{combined_context}
 
 Question: {question}
 
@@ -170,7 +191,7 @@ Answer:"""
             
         return QueryResponse(
             answer=answer, 
-            source_urls=[source_url] if source_url else [],
+            source_urls=source_urls,
             model_used=model_used
         )
     

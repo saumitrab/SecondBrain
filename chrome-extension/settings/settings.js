@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const customApiKeyInput = document.getElementById('customApiKey');
   const customApiModelInput = document.getElementById('customApiModel');
   const customApiHeadersInput = document.getElementById('customApiHeaders');
+  const secondBrainServerUrlInput = document.getElementById('secondBrainServerUrl'); // Add this line
   
   const encryptionEnabledInput = document.getElementById('encryptionEnabled');
   const saveButton = document.querySelector('button[type="submit"]');
@@ -191,11 +192,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       'encryptedCustomApiKey',
       'customApiModel',
       'customApiHeaders',
-      'encryptionEnabled'
+      'encryptionEnabled',
+      'secondBrainServerUrl'  // Add this line
     ], async (result) => {
       const captureType = result.captureType || 'local';
       const localLlmUrl = result.localLlmUrl || 'http://localhost:1234/v1';
       const encryptionEnabled = result.encryptionEnabled !== undefined ? result.encryptionEnabled : true;
+      const secondBrainServerUrl = result.secondBrainServerUrl || 'http://localhost:8000';  // Add this line
+      
+      // Set the SecondBrain server URL
+      secondBrainServerUrlInput.value = secondBrainServerUrl;  // Add this line
       
       // Decrypt sensitive data
       encryptionEnabledInput.checked = encryptionEnabled;
@@ -511,6 +517,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const customApiModel = customApiModelInput.value.trim();
     const customApiHeaders = customApiHeadersInput.value.trim();
     const encryptionEnabled = encryptionEnabledInput.checked;
+    const secondBrainServerUrl = secondBrainServerUrlInput.value.trim(); // Add this line
     
     // Validate required fields based on selected provider
     if (captureType !== 'local') {
@@ -540,7 +547,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         encryptedCustomApiKey,
         customApiModel,
         customApiHeaders,
-        encryptionEnabled
+        encryptionEnabled,
+        secondBrainServerUrl // Add this line
       }, () => {
         // Show success message
         statusMessage.textContent = 'Settings saved successfully!';
@@ -557,7 +565,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       chrome.storage.sync.set({
         captureType,
         localLlmUrl,
-        encryptionEnabled
+        encryptionEnabled,
+        secondBrainServerUrl // Add this line
       }, () => {
         // Show success message
         statusMessage.textContent = 'Settings saved successfully!';
@@ -884,4 +893,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Call this function after loading settings
   setupApiKeyValidation();
-}); 
+});

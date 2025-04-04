@@ -352,6 +352,55 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // Keep the message channel open for async response
   }
+
+  // Add this to your existing message listener in background.js
+  if (message.action === 'ingestContent') {
+    const { payload } = message.data;
+    
+    // Get server URL from settings
+    chrome.storage.sync.get(['secondBrainServerUrl'], async (result) => {
+      try {
+        const apiUrl = (result.secondBrainServerUrl || 'http://localhost:8000') + '/ingest';
+        
+        console.log('Sending content to ingest API:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Ingest API error response:', errorText);
+          
+          sendResponse({
+            success: false,
+            message: `API returned status ${response.status}: ${errorText.substring(0, 100)}`
+          });
+          return;
+        }
+        
+        const data = await response.json();
+        console.log('Ingest API response:', data);
+        
+        sendResponse({
+          success: true,
+          data: data
+        });
+      } catch (error) {
+        console.error('Error calling ingest API:', error);
+        sendResponse({
+          success: false,
+          message: error.message
+        });
+      }
+    });
+    
+    return true; // Keep the message channel open for async response
+  }
 });
 
 // Format content based on provider's token limits
@@ -1517,4 +1566,4 @@ async function fetchApiEndpoint(endpoint, method, data, token, retries = 2) {
   // This should never be reached due to the throw in the loop,
   // but just in case we had a logic error
   throw lastError || new Error(`Failed to fetch ${endpoint} after ${retries} retries`);
-} 
+}

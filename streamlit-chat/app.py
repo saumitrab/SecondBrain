@@ -10,161 +10,306 @@ st.set_page_config(
     layout="wide",
 )
 
-# Apply custom CSS for a clean and minimalist design
+# Apply custom CSS for a clean, responsive design with proper light/dark mode support
 st.markdown("""
 <style>
+    /* Theme-aware variables */
+    :root {
+        --text-color: #1F2937;
+        --bg-color: #FFFFFF;
+        --card-bg: #F9FAFB;
+        --primary-color: #4F46E5;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --info-color: #3B82F6;
+        --border-color: #E5E7EB;
+        --sidebar-bg: #1F2937;
+        --sidebar-text: #F9FAFB;
+        --sidebar-section-bg: #374151;
+        --sidebar-border: #4B5563;
+    }
+    
+    /* Dark mode overrides */
+    [data-theme="dark"] {
+        --text-color: #F9FAFB;
+        --bg-color: #111827;
+        --card-bg: #1F2937;
+        --primary-color: #6366F1;
+        --border-color: #4B5563;
+        --sidebar-bg: #111827;
+        --sidebar-text: #F9FAFB;
+        --sidebar-section-bg: #1F2937;
+        --sidebar-border: #374151;
+    }
+    
+    /* Base styles */
     .main {
-        padding: 1.5rem;
+        padding: 2rem;
         max-width: 1200px;
         margin: 0 auto;
+        color: var(--text-color);
     }
+    
+    /* Button styles */
     .stButton button {
         width: 100%;
         border-radius: 6px;
         height: 3em;
         font-weight: 600;
-        background-color: #4F46E5;
+        background-color: var(--primary-color);
         color: white;
         border: none;
         transition: all 0.3s ease;
     }
+    
     .stButton button:hover {
-        background-color: #4338CA;
+        filter: brightness(1.1);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    .stTextInput input {
+    
+    /* Input field styles */
+    .stTextInput input, .stTextArea textarea {
         border-radius: 6px;
         font-size: 16px;
         padding: 10px;
-        border: 1px solid #E5E7EB;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-color);
+        color: var(--text-color);
     }
-    .stTextArea textarea {
-        border-radius: 6px;
-        font-size: 16px;
-        border: 1px solid #E5E7EB;
-    }
+    
+    /* Chat message styles - IMPROVED SPACING */
     .chat-message {
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    .chat-message.user {
-        background-color: #F3F4F6;
-        border-left: 3px solid #4F46E5;
-    }
-    .chat-message.assistant {
-        background-color: #F9FAFB;
-        border-left: 3px solid #10B981;
-    }
-    .chat-header {
-        font-weight: 600;
-        margin-bottom: 0.4rem;
-        display: flex;
-        align-items: center;
-    }
-    .chat-header-user {
-        color: #4F46E5;
-    }
-    .chat-header-assistant {
-        color: #10B981;
-    }
-    .chat-content {
-        line-height: 1.5;
-    }
-    .sources-section {
-        margin-top: 0.8rem;
-        padding-top: 0.5rem;
-        border-top: 1px solid #E5E7EB;
-    }
-    .source-item {
-        margin: 0.3rem 0;
-        display: flex;
-        align-items: center;
-    }
-    .source-icon {
-        margin-right: 0.4rem;
-        color: #6B7280;
-    }
-    [data-testid="stSidebar"] {
-        background-color: #1F2937;
-        padding: 1rem;
-    }
-    .sidebar-title {
-        font-weight: 600;
-        color: #FFFFFF;
-        margin-bottom: 1rem;
-    }
-    .sidebar-section {
-        background-color: #374151;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 8px;
         margin-bottom: 1.5rem;
-        border: 1px solid #4B5563;
-        color: #F9FAFB;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    div[data-testid="stVerticalBlock"] {
-        gap: 0 !important;
+    
+    .chat-message.user {
+        background-color: rgba(79, 70, 229, 0.1);
+        border-left: 3px solid var(--primary-color);
+        color: var(--text-color);
     }
-    .stRadio > div {
-        padding: 0.5rem 0;
-        color: #F9FAFB;
+    
+    .chat-message.assistant {
+        background-color: var(--card-bg);
+        border-left: 3px solid var(--success-color);
+        color: var(--text-color);
     }
-    .stRadio label {
-        color: #F9FAFB !important;
+    
+    /* Chat headers - IMPROVED SPACING */
+    .chat-header {
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        font-size: 1.1rem;
     }
-    .stRadio label span {
-        color: #F9FAFB !important;
+    
+    .chat-header-user {
+        color: var(--primary-color);
     }
-    .stSelectbox > div {
-        color: #F9FAFB;
+    
+    .chat-header-assistant {
+        color: var(--success-color);
     }
-    .stSelectbox > div > div > div {
-        background-color: #4B5563;
-        color: #F9FAFB;
-        border-radius: 6px;
+    
+    .chat-content {
+        line-height: 1.7;
+        color: var(--text-color);
     }
-    .model-info {
-        font-size: 0.9rem;
-        color: #D1D5DB;
+    
+    /* Source section styles - IMPROVED SPACING */
+    .sources-section {
+        margin-top: 1.2rem;
+        padding-top: 0.8rem;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-color);
+    }
+    
+    .source-item {
+        margin: 0.5rem 0;
         padding: 0.3rem 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .source-icon {
+        margin-right: 0.5rem;
+    }
+    
+    .source-item a {
+        color: var(--primary-color);
+        padding: 0.2rem 0;
+    }
+    
+    /* Sidebar styles */
+    [data-testid="stSidebar"] {
+        background-color: var(--sidebar-bg);
+        padding: 1.5rem;
+    }
+    
+    .sidebar-title {
+        font-weight: 600;
+        color: var(--sidebar-text);
+        margin-bottom: 1.2rem;
+        font-size: 1.1rem;
+    }
+    
+    .sidebar-section {
+        background-color: var(--sidebar-section-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--sidebar-border);
+        color: var(--sidebar-text);
+    }
+    
+    /* Fix spacing issues */
+    div[data-testid="stVerticalBlock"] {
+        gap: 0.8rem !important;
+    }
+    
+    /* Radio button styles - IMPROVED SPACING */
+    .stRadio > div {
+        padding: 0.7rem 0;
+        color: var(--sidebar-text);
+    }
+    
+    .stRadio label p {
+        color: var(--sidebar-text) !important;
+        padding: 0.3rem 0;
+    }
+    
+    /* Select box styles */
+    .stSelectbox > div > label {
+        color: var(--sidebar-text) !important;
+        padding-bottom: 0.5rem;
+    }
+    
+    .stSelectbox > div > div > div {
+        background-color: var(--sidebar-section-bg);
+        color: var(--sidebar-text);
+        border-radius: 6px;
+        padding: 0.2rem;
+    }
+    
+    /* Model info styles */
+    .model-info {
+        font-size: 0.95rem;
+        color: var(--sidebar-text);
+        opacity: 0.9;
+        padding: 0.5rem 0;
         white-space: pre-line;
+        line-height: 1.6;
     }
+    
+    /* Alert styles - IMPROVED SPACING */
     .sidebar-info {
-        background-color: #3B82F6;
+        background-color: var(--info-color);
         color: white;
-        padding: 0.5rem;
+        padding: 0.8rem;
         border-radius: 6px;
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
     }
+    
     .sidebar-warning {
-        background-color: #F59E0B;
-        color: #1F2937;
-        padding: 0.5rem;
+        background-color: var(--warning-color);
+        padding: 0.8rem;
         border-radius: 6px;
-        margin-top: 0.5rem;
+        margin-top: 0.8rem;
         font-weight: 500;
+        color: #1F2937;
     }
+    
+    /* Fix markdown container colors */
     [data-testid="stMarkdownContainer"] {
         color: inherit;
+        margin-bottom: 0.5rem;
     }
+    
+    /* Fix text input label colors and spacing */
     .stTextInput label {
-        color: #F9FAFB !important;
+        color: var(--sidebar-text) !important;
+        padding-bottom: 0.5rem;
     }
-    .stTextInput input::placeholder {
-        color: #9CA3AF;
+    
+    .stTextArea label {
+        margin-bottom: 0.5rem;
     }
+    
+    .stTextInput input::placeholder, .stTextArea textarea::placeholder {
+        color: rgba(156, 163, 175, 0.8);
+    }
+    
+    /* Improved spacing utilities */
     .sidebar-elem-spacing {
-        margin-bottom: 1rem;
+        margin-bottom: 1.2rem;
     }
+    
     .sidebar-large-spacing {
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
     }
+    
     .sidebar-section-spacing {
         margin-top: 2.5rem;
         margin-bottom: 1.5rem;
+    }
+    
+    /* Fix caption color and add space */
+    .stCaption {
+        color: var(--text-color);
+        margin-top: 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    /* Ensure links are visible in both modes */
+    a {
+        color: var(--primary-color);
+        text-decoration: underline;
+        padding: 0.1rem 0;
+    }
+    
+    /* Status message colors */
+    [data-testid="stStatus"] {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    /* Add space before and after dividers */
+    hr {
+        margin: 1.5rem 0;
+    }
+    
+    /* Improve text area spacing */
+    div.stTextArea {
+        padding-bottom: 1rem;
+    }
+    
+    /* Better spacing for inputs */
+    div.block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    
+    /* Add space between consecutive chats */
+    div.chat-container > div {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Improve paragraph spacing in chat messages */
+    .chat-content p {
+        margin-bottom: 0.8rem;
+    }
+    
+    /* Add proper spacing for lists in chat messages */
+    .chat-content ul, .chat-content ol {
+        padding-left: 1.5rem;
+        margin-bottom: 0.8rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -178,6 +323,10 @@ if 'llm_choice' not in st.session_state:
 
 if 'groq_model' not in st.session_state:
     st.session_state.groq_model = "llama3-8b-8192"  # Default Groq model
+
+# Add flag for input clearing - this is the fix
+if 'clear_input' not in st.session_state:
+    st.session_state.clear_input = False
 
 # List of available Groq models
 GROQ_MODELS = {
@@ -267,7 +416,7 @@ with st.sidebar:
     
     if st.button("Clear Chat History", use_container_width=True, type="secondary"):
         st.session_state.chat_history = []
-        st.experimental_rerun()
+        st.rerun()
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -321,12 +470,23 @@ with main_container:
     # Input area
     st.divider()
     with st.container():
-        question = st.text_area(
-            "", 
-            key="question_input",
-            height=100,
-            placeholder="Type your question here..."
-        )
+        # Check if we need to clear the input - this implements the fix
+        if st.session_state.clear_input:
+            st.session_state.clear_input = False
+            question = st.text_area(
+                "", 
+                value="",  # Clear the input
+                key="question_input",
+                height=100,
+                placeholder="Type your question here..."
+            )
+        else:
+            question = st.text_area(
+                "", 
+                key="question_input",
+                height=100,
+                placeholder="Type your question here..."
+            )
         
         # Layout for Ask button and model indicator
         col1, col2 = st.columns([3, 1])
@@ -419,8 +579,8 @@ if ask_button and question.strip():
                 "sources": []
             })
     
-    # Clear the input field
-    st.session_state.question_input = ""
+    # Set the clear_input flag instead of directly modifying the input
+    st.session_state.clear_input = True
     
     # Rerun to update the UI with the new message
-    st.experimental_rerun()
+    st.rerun()

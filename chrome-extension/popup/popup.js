@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const sendBtn = document.getElementById('sendBtn');
   const chatMessages = document.getElementById('chatMessages');
   
+  const ingestBtn = document.getElementById('ingestBtn');
+  
   // Chat context storage
   let pageContext = {
     title: '',
@@ -172,6 +174,83 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
+  // Handle ingest button click
+  ingestBtn.addEventListener('click', async () => {
+    try {
+      // Show loading state
+      ingestBtn.disabled = true;
+      statusMessage.textContent = 'Ingesting content...';
+      statusMessage.className = 'status-message';
+      
+      // Get current tab
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      // Send message to content script to scrape the page
+      chrome.tabs.sendMessage(tab.id, { action: 'scrapeContent' }, async (response) => {
+        if (chrome.runtime.lastError) {
+          showError('Failed to connect to page. Please refresh and try again.');
+          ingestBtn.disabled = false;
+          return;
+        }
+        
+        if (!response || !response.success) {
+          showError('Failed to scrape content. Please try again.');
+          ingestBtn.disabled = false;
+          return;
+        }
+        
+        const { title, content } = response;
+        
+        // Create timestamp and payload
+        const timestamp = new Date().toISOString();
+        const payload = {
+          url: tab.url,
+          title: title,
+          textContent: content,
+          images: [], // Would need additional scraping for images
+          videoTranscriptions: [], // Would need additional scraping for videos
+          timestamp: timestamp
+        };
+        
+        // Send to background script to handle API call
+        chrome.runtime.sendMessage({
+          action: 'ingestContent',
+          data: { payload }
+        }, (result) => {
+          if (chrome.runtime.lastError) {
+            showError('Error communicating with background script.');
+            ingestBtn.disabled = false;
+            return;
+          }
+          
+          if (!result.success) {
+            showError(`Ingest API error: ${result.message}`);
+            ingestBtn.disabled = false;
+            return;
+          }
+          
+          const data = result.data;
+          
+          // Show success message
+          statusMessage.textContent = 'Content successfully sent to knowledge base!';
+          statusMessage.className = 'status-message success';
+          
+          // Update capture content to show confirmation
+          captureContent.innerHTML = `
+            <p>Content from "${title}" has been sent to your knowledge base.</p>
+            <p class="ingest-status">Status: ${data.status}</p>
+            <p class="ingest-message">${data.message}</p>
+          `;
+          
+          ingestBtn.disabled = false;
+        });
+      });
+    } catch (error) {
+      showError(`Error: ${error.message}`);
+      ingestBtn.disabled = false;
+    }
+  });
+  
   // Open settings page
   settingsBtn.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
@@ -321,8 +400,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   function showError(message) {
     captureContent.innerHTML = `<p class="error">${message}</p>`;
+    statusMessage.textContent = message;
+    statusMessage.className = 'status-message error';
     currentTaskId = null;
     captureBtn.disabled = false;
+    ingestBtn.disabled = false;
   }
   
   // Function to check API connection status
@@ -502,4 +584,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Reduce the monitoring interval to check more frequently
   setInterval(monitorCaptureProgress, 15000); // Check every 15 seconds instead of every minute
-}); 
+});

@@ -220,9 +220,22 @@ button:disabled {
 }
 
 .status-message.error {
-  background-color: #fce8e6;
-  color: #c5221f;
-  border: 1px solid #c5221f;
+  color: #f44336;
+  font-weight: bold;
+}
+
+.status-message.success {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.ingest-status {
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.ingest-message {
+  font-style: italic;
 }
 
 .error {
@@ -270,4 +283,4 @@ button:disabled {
 
 .reset-button:hover {
   background-color: #c9302c;
-} 
+}

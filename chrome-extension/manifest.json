@@ -8,8 +8,7 @@
     "storage",
     "contextMenus",
     "scripting",
-    "tabs",
-    "contentSecurityPolicy"
+    "tabs"
   ],
   "host_permissions": [
     "https://your-secondbrain-api.com/*",

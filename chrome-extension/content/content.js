@@ -215,6 +215,31 @@ function safeDOMInteraction() {
   }
 }
 
-// Add debounce for frequent events
-const debouncedHandler = _.debounce(eventHandler, 300);
-document.addEventListener('scroll', debouncedHandler); 
+// Replace _.debounce with a custom implementation
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Define the missing eventHandler function
+function eventHandler() {
+  // This function can track scroll events if needed
+  // For now, just a placeholder implementation
+  const scrollPosition = window.scrollY;
+  const pageHeight = document.body.scrollHeight;
+  const windowHeight = window.innerHeight;
+  const scrollPercentage = (scrollPosition / (pageHeight - windowHeight)) * 100;
+  
+  console.debug(`Scrolled to ${Math.round(scrollPercentage)}% of the page`);
+}
+
+// Use our custom debounce function
+const debouncedHandler = debounce(eventHandler, 300);
+document.addEventListener('scroll', debouncedHandler);
