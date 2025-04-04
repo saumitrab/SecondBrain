@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Second Brain</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Second Brain</h1>
+    <div class="controls">
+      <button id="captureBtn">Capture This Page</button>
+      <button id="settingsBtn">Settings</button>
+    </div>
+    
+    <div class="result-container" id="resultContainer">
+      <h2 id="pageTitle"></h2>
+      <div class="capture-container">
+        <h3>Capture</h3>
+        <div id="captureContent" class="capture-content">
+          <p class="placeholder">Click "Capture This Page" to generate a capture.</p>
+        </div>
+      </div>
+      
+      <!-- Chat interface -->
+      <div class="chat-container" id="chatContainer">
+        <h3>Ask a Question</h3>
+        <div id="chatMessages" class="chat-messages">
+          <!-- Chat messages will appear here -->
+        </div>
+        <div class="chat-input-container">
+          <textarea id="chatInput" class="chat-input" placeholder="Ask a question about this page..." disabled></textarea>
+          <button id="sendBtn" class="send-btn" disabled>Ask</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <p>Generating capture...</p>
+    </div>
+    
+    <!-- Add this near your progress bar -->
+    <div class="reset-container">
+      <button id="reset-btn" class="reset-button" style="display: none;">Reset Stuck Process</button>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 

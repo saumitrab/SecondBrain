@@ -1,0 +1,185 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  color: #333;
+}
+
+h2 {
+  font-size: 18px;
+  color: #555;
+}
+
+.setting {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  margin-bottom: 8px;
+}
+
+.radio-group input {
+  margin-right: 8px;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #777;
+  margin-top: 4px;
+}
+
+.actions {
+  margin-top: 24px;
+}
+
+button {
+  padding: 10px 16px;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #3367d6;
+}
+
+button:disabled {
+  background-color: #a9a9a9;
+  cursor: not-allowed;
+}
+
+/* Connection status styles */
+.connection-status {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-indicator.connected {
+  background-color: #34a853;
+  box-shadow: 0 0 5px #34a853;
+}
+
+.status-indicator.disconnected {
+  background-color: #ea4335;
+  box-shadow: 0 0 5px #ea4335;
+}
+
+.status-indicator.unknown {
+  background-color: #fbbc05;
+  box-shadow: 0 0 5px #fbbc05;
+}
+
+.test-connection-btn {
+  margin-top: 8px;
+  background-color: #5f6368;
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.test-connection-btn:hover {
+  background-color: #494c50;
+}
+
+.status-message {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.status-message.success {
+  background-color: #e6f4ea;
+  color: #137333;
+  border: 1px solid #137333;
+}
+
+.status-message.error {
+  background-color: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #c5221f;
+}
+
+.status-message.info {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+  border: 1px solid #1a73e8;
+}
+
+.switch-button {
+  margin-top: 10px;
+  background-color: #34a853;
+}
+
+.switch-button:hover {
+  background-color: #2e7d32;
+}
+
+.settings-info {
+  margin-top: 32px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.settings-info h2 {
+  margin-bottom: 16px;
+}
+
+.settings-info ol {
+  padding-left: 24px;
+}
+
+.settings-info li {
+  margin-bottom: 8px;
+} 

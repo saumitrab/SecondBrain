@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Second Brain Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Second Brain Settings</h1>
+    
+    <form id="settingsForm">
+      <div class="setting">
+        <h2>Capture Method</h2>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="captureType" value="local" checked>
+            Local LLM (requires LM Studio running)
+          </label>
+          <label>
+            <input type="radio" name="captureType" value="groq">
+            Groq API
+          </label>
+          <label>
+            <input type="radio" name="captureType" value="openai">
+            OpenAI API
+          </label>
+          <label>
+            <input type="radio" name="captureType" value="deepseek">
+            Deepseek API
+          </label>
+          <label>
+            <input type="radio" name="captureType" value="custom">
+            Custom LLM API
+          </label>
+        </div>
+      </div>
+      
+      <div class="setting" id="localSettings">
+        <h2>Local LLM Settings</h2>
+        <div class="form-group">
+          <label for="localLlmUrl">LM Studio API URL:</label>
+          <input type="text" id="localLlmUrl" placeholder="http://localhost:1234/v1">
+          <p class="help-text">Make sure LM Studio is running with the deepseek-r1-distill-qwen-7b model loaded</p>
+        </div>
+      </div>
+      
+      <div class="setting api-setting" id="groqSettings" style="display: none;">
+        <h2>Groq API Settings</h2>
+        <div class="form-group">
+          <label for="groqApiKey">Groq API Key:</label>
+          <input type="password" id="groqApiKey" placeholder="Enter your Groq API key">
+          <p class="help-text">Your API key is stored locally and encrypted</p>
+        </div>
+        <div class="form-group">
+          <label for="groqModel">Model:</label>
+          <select id="groqModel">
+            <option value="llama3-8b-8192">Llama-3 8B</option>
+            <option value="llama3-70b-8192">Llama-3 70B</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="setting api-setting" id="openaiSettings" style="display: none;">
+        <h2>OpenAI API Settings</h2>
+        <div class="form-group">
+          <label for="openaiApiKey">OpenAI API Key:</label>
+          <input type="password" id="openaiApiKey" placeholder="Enter your OpenAI API key">
+          <p class="help-text">Your API key is stored locally and encrypted</p>
+        </div>
+        <div class="form-group">
+          <label for="openaiModel">Model:</label>
+          <select id="openaiModel">
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            <option value="gpt-4">GPT-4</option>
+            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="setting api-setting" id="deepseekSettings" style="display: none;">
+        <h2>Deepseek API Settings</h2>
+        <div class="form-group">
+          <label for="deepseekApiKey">Deepseek API Key:</label>
+          <input type="password" id="deepseekApiKey" placeholder="Enter your Deepseek API key">
+          <p class="help-text">Your API key is stored locally and encrypted</p>
+        </div>
+        <div class="form-group">
+          <label for="deepseekModel">Model:</label>
+          <select id="deepseekModel">
+            <option value="deepseek-chat">Deepseek Chat</option>
+            <option value="deepseek-coder">Deepseek Coder</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="setting api-setting" id="customSettings" style="display: none;">
+        <h2>Custom LLM API Settings</h2>
+        <div class="form-group">
+          <label for="customApiName">API Provider Name:</label>
+          <input type="text" id="customApiName" placeholder="Provider name (e.g., Anthropic, Claude)">
+        </div>
+        <div class="form-group">
+          <label for="customApiEndpoint">API Endpoint:</label>
+          <input type="text" id="customApiEndpoint" placeholder="https://api.example.com/v1/chat/completions">
+        </div>
+        <div class="form-group">
+          <label for="customApiKey">API Key:</label>
+          <input type="password" id="customApiKey" placeholder="Enter your API key">
+          <p class="help-text">Your API key is stored locally and encrypted</p>
+        </div>
+        <div class="form-group">
+          <label for="customApiModel">Model Name:</label>
+          <input type="text" id="customApiModel" placeholder="Model name or ID">
+        </div>
+        <div class="form-group">
+          <label for="customApiHeaders">Additional Headers (JSON format):</label>
+          <textarea id="customApiHeaders" rows="3" placeholder='{"header-name": "value"}'></textarea>
+          <p class="help-text">Optional: Add any additional headers required by the API</p>
+        </div>
+      </div>
+      
+      <div class="setting">
+        <h2>Security Settings</h2>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="encryptionEnabled" checked>
+            Enable encryption for API keys
+          </label>
+          <p class="help-text">All API keys will be encrypted before storing them on your device</p>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <button type="submit" id="saveBtn">Save Settings</button>
+        <button type="button" id="testConnectionBtn">Test Connection</button>
+      </div>
+    </form>
+    
+    <div class="settings-info">
+      <h2>How to use the extension</h2>
+      <ol>
+        <li>Navigate to any webpage you want to capture</li>
+        <li>Click the extension icon</li>
+        <li>Press "Capture This Page"</li>
+        <li>Wait for the capture to be generated</li>
+        <li>Ask follow-up questions in the chat interface</li>
+      </ol>
+      
+      <h3>Local LLM Setup</h3>
+      <ol>
+        <li>Download and install <a href="https://lmstudio.ai/" target="_blank">LM Studio</a></li>
+        <li>Load the deepseek-r1-distill-qwen-7b model</li>
+        <li>Start the local server in LM Studio</li>
+        <li>Use the extension to capture content</li>
+      </ol>
+      
+      <h3>API Keys Security</h3>
+      <p>Your API keys are stored locally in your browser's secure storage. When encryption is enabled, keys are encrypted before storage for additional security.</p>
+    </div>
+  </div>
+  
+  <script src="settings.js"></script>
+</body>
+</html> 
