@@ -10,6 +10,9 @@ The Streamlit UI provides a clean, minimalist interface to:
 - Select from multiple Groq models with different capabilities
 - View answers, reasoning, and sources used to generate answers
 
+![SecondBrain System Overview](resources/SecondBrainOverView.png)
+*System architecture overview showing data flow between components*
+
 ## Key Features
 
 - **Clean Minimalist Design**: Simple, uncluttered interface with pleasant color scheme
