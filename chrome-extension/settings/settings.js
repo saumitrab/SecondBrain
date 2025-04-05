@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const settingsForm = document.getElementById('settingsForm');
-  const encryptionEnabledInput = document.getElementById('encryptionEnabled');
   const secondBrainServerUrlInput = document.getElementById('secondBrainServerUrl');
   const saveButton = document.querySelector('button[type="submit"]');
   const statusMessage = document.createElement('div');
@@ -18,13 +17,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!data) return '';
     
     console.log('Encrypting data, length:', data.length);
-    
-    if (!encryptionEnabledInput.checked) {
-      // Simple base64 encoding if encryption is disabled
-      const encoded = btoa(data);
-      console.log('Using base64 encoding, result length:', encoded.length);
-      return encoded;
-    }
     
     try {
       // Create a random initialization vector
@@ -86,11 +78,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!encryptedData) return '';
     
     try {
-      // If it's just base64 (no encryption), decode it
-      if (!encryptionEnabledInput.checked) {
-        return atob(encryptedData);
-      }
-      
       // Convert base64 to array buffer
       const encryptedBytes = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
       
@@ -146,14 +133,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Load saved settings
   async function loadSettings() {
     chrome.storage.sync.get([
-      'encryptionEnabled',
       'secondBrainServerUrl'
     ], async (result) => {
-      const encryptionEnabled = result.encryptionEnabled !== undefined ? result.encryptionEnabled : true;
       const secondBrainServerUrl = result.secondBrainServerUrl || 'http://localhost:8000';
       
       // Set the form values
-      encryptionEnabledInput.checked = encryptionEnabled;
       secondBrainServerUrlInput.value = secondBrainServerUrl;
     });
   }
@@ -167,12 +151,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveButton.disabled = true;
     
     // Get values from form
-    const encryptionEnabled = encryptionEnabledInput.checked;
     const secondBrainServerUrl = secondBrainServerUrlInput.value.trim();
     
-    // Validate and save settings
-    statusMessage.textContent = 'Saving settings...';
-    statusMessage.className = 'status-message info';
+    // Always use encryption (hardcoded to true since we removed the checkbox)
+    const encryptionEnabled = true;
     
     // Save to storage
     chrome.storage.sync.set({
