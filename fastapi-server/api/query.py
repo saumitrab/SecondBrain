@@ -9,6 +9,8 @@ from typing import Optional
 # Import vector database and embedding model
 from models.embedding_model import create_embeddings
 
+# Import instructor for structured output
+import instructor
 from openai import OpenAI
 import httpx
 
@@ -61,6 +63,11 @@ class QueryResponse(BaseModel):
     reasoning: str = Field(default="", description="Step-by-step reasoning before the final answer")
     source_urls: list[str] = []
     model_used: Optional[str] = None
+
+# Define the structured response format for the LLM
+class LLMStructuredResponse(BaseModel):
+    reasoning: str = Field(description="Step-by-step reasoning based on the provided context")
+    answer: str = Field(description="Concise final answer to the user's question")
 
 def cosine_similarity(a: list, b: list) -> float:
     # Simple cosine similarity: dot(a,b)/(||a||*||b||)
@@ -149,7 +156,7 @@ async def query_llm(question: str, llm_choice: str = "local", model: Optional[st
     
     combined_context = "\n\n---\n\n".join(context_parts)
     
-    # Prepare prompt with combined context for LLM, now asking for reasoning and answer separately
+    # Update prompt to ask for structured information without specifying format
     prompt = f"""Answer the question based only on the following context. If the context doesn't contain the answer, say "I don't have information about that in my knowledge base."
 
 Context:
@@ -157,18 +164,15 @@ Context:
 
 Question: {question}
 
-Please provide your response in two parts:
-1. REASONING: First think through the question step by step using the provided context.
-2. ANSWER: Then provide a concise final answer.
-
-Format your response exactly like this:
-REASONING: [your detailed reasoning based on the context]
-ANSWER: [your concise final answer]
+Think step-by-step before providing your final answer.
 """
 
     try:
         # Get appropriate client based on LLM choice
-        client = get_openai_client(llm_choice, api_key)
+        base_client = get_openai_client(llm_choice, api_key)
+        
+        # Wrap with instructor for structured output
+        client = instructor.from_openai(base_client)
         
         # Get appropriate model based on provider and user selection
         model_id = get_model_for_provider(llm_choice, model)
@@ -182,32 +186,35 @@ ANSWER: [your concise final answer]
         # Log model selection
         logger.info(f"Using model: {model_id} with max_tokens: {max_tokens}")
         
-        # Call selected LLM with the combined prompt
-        response = client.chat.completions.create(
-            model=model_id,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7,
-            max_tokens=max_tokens
-        )
-        
-        # Process the response to extract reasoning and answer
-        full_response = response.choices[0].message.content
-        
-        # Extract reasoning and answer using the format markers
-        reasoning = ""
-        answer = ""
-        
-        # Check if response contains the expected format
-        if "REASONING:" in full_response and "ANSWER:" in full_response:
-            parts = full_response.split("ANSWER:")
-            if len(parts) >= 2:
-                reasoning_part = parts[0].strip()
-                reasoning = reasoning_part.replace("REASONING:", "").strip()
-                answer = parts[1].strip()
-        else:
-            # Fallback if format wasn't followed
+        try:
+            # Use instructor to get structured output directly
+            structured_response = client.chat.completions.create(
+                model=model_id,
+                response_model=LLMStructuredResponse,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=max_tokens
+            )
+            
+            # Extract fields from the structured response
+            reasoning = structured_response.reasoning
+            answer = structured_response.answer
+            
+        except Exception as structured_error:
+            logger.error(f"Error using structured output: {structured_error}. Falling back to standard completion.")
+            
+            # Fallback to standard completion if structured output fails
+            response = base_client.chat.completions.create(
+                model=model_id,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,
+                max_tokens=max_tokens
+            )
+            
+            full_response = response.choices[0].message.content
+            # Fallback if structured format wasn't followed
             answer = full_response
-            reasoning = "No explicit reasoning provided."
+            reasoning = "No structured reasoning available. Please check the answer for details."
         
         # Get readable model name for the response
         if llm_choice == "groq" and model_id in GROQ_MODELS:

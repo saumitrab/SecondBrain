@@ -9,3 +9,4 @@ pillow>=9.0.0
 numpy>=1.20.0
 chromadb>=1.0.0
 openai>=1.70.0
+instructor>=0.5.0  # Added for structured LLM responses
