@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import logging
 import math
 import asyncio
@@ -58,6 +58,7 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     answer: str
+    reasoning: str = Field(default="", description="Step-by-step reasoning before the final answer")
     source_urls: list[str] = []
     model_used: Optional[str] = None
 
@@ -112,7 +113,7 @@ async def query_llm(question: str, llm_choice: str = "local", model: Optional[st
         threshold=0.1  # similarity threshold
     )
 
-    logger.info(f"YYYYY Found {len(relevant_chunks)} relevant chunks with similarities: {similarities}")
+    # logger.debug(f"YYYYY Found {len(relevant_chunks)} relevant chunks with similarities: {similarities}")
     
     # If no document found or similarity is too low
     if not relevant_chunks:
@@ -120,6 +121,7 @@ async def query_llm(question: str, llm_choice: str = "local", model: Optional[st
         model_info = f"{GROQ_MODELS.get(model, {}).get('name', model)}" if llm_choice == "groq" and model else "Local LLM"
         return QueryResponse(
             answer="I don't have enough information to answer that question.",
+            reasoning="No reasoning available due to lack of context.",
             source_urls=[],
             model_used=model_info
         )
@@ -147,7 +149,7 @@ async def query_llm(question: str, llm_choice: str = "local", model: Optional[st
     
     combined_context = "\n\n---\n\n".join(context_parts)
     
-    # Prepare prompt with combined context for LLM
+    # Prepare prompt with combined context for LLM, now asking for reasoning and answer separately
     prompt = f"""Answer the question based only on the following context. If the context doesn't contain the answer, say "I don't have information about that in my knowledge base."
 
 Context:
@@ -155,7 +157,14 @@ Context:
 
 Question: {question}
 
-Answer:"""
+Please provide your response in two parts:
+1. REASONING: First think through the question step by step using the provided context.
+2. ANSWER: Then provide a concise final answer.
+
+Format your response exactly like this:
+REASONING: [your detailed reasoning based on the context]
+ANSWER: [your concise final answer]
+"""
 
     try:
         # Get appropriate client based on LLM choice
@@ -181,7 +190,24 @@ Answer:"""
             max_tokens=max_tokens
         )
         
-        answer = response.choices[0].message.content
+        # Process the response to extract reasoning and answer
+        full_response = response.choices[0].message.content
+        
+        # Extract reasoning and answer using the format markers
+        reasoning = ""
+        answer = ""
+        
+        # Check if response contains the expected format
+        if "REASONING:" in full_response and "ANSWER:" in full_response:
+            parts = full_response.split("ANSWER:")
+            if len(parts) >= 2:
+                reasoning_part = parts[0].strip()
+                reasoning = reasoning_part.replace("REASONING:", "").strip()
+                answer = parts[1].strip()
+        else:
+            # Fallback if format wasn't followed
+            answer = full_response
+            reasoning = "No explicit reasoning provided."
         
         # Get readable model name for the response
         if llm_choice == "groq" and model_id in GROQ_MODELS:
@@ -191,6 +217,7 @@ Answer:"""
             
         return QueryResponse(
             answer=answer, 
+            reasoning=reasoning,
             source_urls=source_urls,
             model_used=model_used
         )

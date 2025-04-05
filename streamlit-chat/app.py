@@ -83,6 +83,23 @@ st.markdown("""
     .chat-container {
         padding-bottom: 60px;
     }
+    
+    /* New styles for reasoning */
+    .reasoning-section {
+        margin-top: 0.8rem;
+        font-size: 0.9rem;
+        padding: 0.8rem;
+        background-color: #F8F9FA;
+        border-left: 3px solid #6C757D;
+        border-radius: 4px;
+        color: #495057;
+    }
+    
+    .reasoning-title {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        color: #495057;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -125,13 +142,20 @@ def display_chat_messages():
                 unsafe_allow_html=True
             )
         else:
+            # Start the assistant message
             st.markdown(
                 f"""<div class="chat-message">
                     <div class="avatar assistant">🤖</div>
                     <div class="chat-message-content">
-                        {message['content']}""", 
+                        {message['content']}
+                    </div>""", 
                 unsafe_allow_html=True
             )
+            
+            # Show reasoning in a collapsible expander if available
+            if "reasoning" in message and message["reasoning"]:
+                with st.expander("See reasoning"):
+                    st.markdown(message["reasoning"])
             
             # Show sources if available
             if "sources" in message and message["sources"]:
@@ -148,8 +172,8 @@ def display_chat_messages():
                 sources_html += "</div>"
                 st.markdown(sources_html, unsafe_allow_html=True)
             
-            # Close the divs
-            st.markdown("</div></div>", unsafe_allow_html=True)
+            # Close the chat message div
+            st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -271,12 +295,14 @@ def process_message(question):
             if response.ok:
                 data = response.json()
                 answer = data.get("answer", "")
+                reasoning = data.get("reasoning", "")
                 source_urls = data.get("source_urls", [])
                 
-                # Add response to chat history
+                # Add response to chat history with reasoning
                 st.session_state.chat_history.append({
                     "role": "assistant", 
                     "content": answer,
+                    "reasoning": reasoning,
                     "sources": source_urls
                 })
                 
